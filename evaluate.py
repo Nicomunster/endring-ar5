@@ -200,7 +200,7 @@ def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics=
                     preds = fjern_tmyr(preds, tmyr)
                 results = scores_df(preds, metrics)
                 results.to_excel(writer, str(int(artype)))
-                results_dict[int(artype)] = results
+                results_dict[str(artype)] = results
     return results_dict
             
             
@@ -229,33 +229,32 @@ def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metric
                     preds = fjern_tmyr(preds, tmyr)
                 results = scores_df(preds, metrics)
                 results.to_excel(writer, str(int(artype_etter)))
-                results_dict[int(artype_etter)] = results
+                results_dict[str(artype_etter)] = results
     return results_dict
 
 
 def artype_barplot(results_dict, total_score, gridcode, metric, y=None):
     """Plotter resultater basert på artype."""
     # Dictionary som lagrer navn of farge til ARTYPE-kodene
-    artype_props = {11: {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
-                    12: {'Navn':'Samferdsel', 'Farge': '#b3784c'},
-                    21: {'Navn':'Fulldyrka jord', 'Farge': '#ffd16e'},
-                    22: {'Navn':'Overflatedyrka jord', 'Farge': '#ffff4c'},
-                    23: {'Navn':'Innmarksbeite', 'Farge': '#ffffad'},
-                    30: {'Navn':'Skog', 'Farge': '#9ecc73'},
-                    50: {'Navn':'Åpen fastmark', 'Farge': '#d9d9d9'},
-                    60: {'Navn':'Myr', 'Farge': '#1d7a8d'},
-                    70: {'Navn':'Bre', 'Farge': '#e6ffff'},
-                    80: {'Navn':'Vann', 'Farge': '#ccf5ff'},
-                    81: {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
-                    82: {'Navn':'Hav', 'Farge': '#ccfefe'},
-                    99: {'Navn':'Ikke kartlagt', 'Farge': '#000000'},
-                    100: {'Navn':'Totalt', 'Farge': '#000000'}}
+    artype_props = {"11": {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
+                    "12": {'Navn':'Samferdsel', 'Farge': '#b3784c'},
+                    "21": {'Navn':'Fulldyrka jord', 'Farge': '#ffd16e'},
+                    "22": {'Navn':'Overflatedyrka jord', 'Farge': '#ffff4c'},
+                    "23": {'Navn':'Innmarksbeite', 'Farge': '#ffffad'},
+                    "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
+                    "50": {'Navn':'Åpen fastmark', 'Farge': '#d9d9d9'},
+                    "60": {'Navn':'Myr', 'Farge': '#1d7a8d'},
+                    "70": {'Navn':'Bre', 'Farge': '#e6ffff'},
+                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
+                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
+                    "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
+                    "99": {'Navn':'Ikke kartlagt', 'Farge': '#000000'},
+                    "100": {'Navn':'Totalt', 'Farge': '#000000'}}
     artyper = list(sorted(artype_props.keys()))
-    print(artyper)
     
     scores = list()
     for i, artype in enumerate(artyper):
-        if artype == 100:
+        if artype == "100":
             scores.append(total_score)
         elif artype not in results_dict.keys():
             scores.append(0)
