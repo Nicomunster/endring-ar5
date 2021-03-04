@@ -13,6 +13,9 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 
 
 def prediksjoner(df, area_threshold, n_thresholds):
+    """Grupperer arealer i samme rute og beregner prediksjoner for hver gridcode-verdi."""
+    # Fjerner ugyldige verdier
+    df = df[df['gridcode']!=-1.0]
     # Velger kolonner
     df['endring'] = df['endring'].fillna(0)
     df = df[["Id", "gridcode", "endring", "areal_bit"]]
@@ -230,7 +233,7 @@ def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metric
     return results_dict
 
 
-def artype_barplot(results_dict, gridcode, metric, y=None):
+def artype_barplot(results_dict, total_score, gridcode, metric, y=None):
     """Plotter resultater basert på artype."""
     # Dictionary som lagrer navn of farge til ARTYPE-kodene
     artype_props = {11: {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
@@ -245,12 +248,16 @@ def artype_barplot(results_dict, gridcode, metric, y=None):
                     80: {'Navn':'Vann', 'Farge': '#ccf5ff'},
                     81: {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
                     82: {'Navn':'Hav', 'Farge': '#ccfefe'},
-                    99: {'Navn':'Ikke kartlagt', 'Farge': '#000000'}}
+                    99: {'Navn':'Ikke kartlagt', 'Farge': '#000000'},
+                    100: {'Navn':'Totalt', 'Farge': '#000000'}}
     artyper = list(sorted(artype_props.keys()))
+    print(artyper)
     
-    scores = []
+    scores = list()
     for i, artype in enumerate(artyper):
-        if artype not in results_dict.keys():
+        if artype == 100:
+            scores.append(total_score)
+        elif artype not in results_dict.keys():
             scores.append(0)
         else:
             df = results_dict[artype]
