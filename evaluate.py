@@ -233,7 +233,7 @@ def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metric
     return results_dict
 
 
-def artype_barplot(results_dict, total_score, gridcode, metric, y=None, title=None):
+def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None):
     """Plotter resultater basert på artype."""
     # Dictionary som lagrer navn of farge til ARTYPE-kodene
     artype_props = {"11": {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
@@ -255,7 +255,7 @@ def artype_barplot(results_dict, total_score, gridcode, metric, y=None, title=No
     scores = list()
     for i, artype in enumerate(artyper):
         if artype == "100":
-            scores.append(total_score)
+            scores.append(total_df.at[gridcode, metric])
         elif artype not in results_dict.keys():
             scores.append(0)
         else:
