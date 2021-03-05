@@ -9,7 +9,6 @@ import pandas as pd
 import evaluate as ev
 
 fra_excel = True
-
 #%% Nes
 if not fra_excel:
     # Laster inn csv-filer
@@ -100,4 +99,28 @@ if fra_excel:
 ev.artype_barplot(etnedal_results_for, etnedal_results, 50, "MCC", title="Etnedal kommune før endringer")
 ev.artype_barplot(etnedal_results_etter, etnedal_results, 50, "MCC" ,title="Etnedal kommune etter endringer")
 
+#%% Gjerdrum
 
+if not fra_excel:
+    # Laster inn csv-filer
+    gjerdrum_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_pred_ar5_endring.csv", low_memory=False)
+    gjerdrum_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_ruter_med_tresatt_myr.csv")
+    
+    gjerdrum_results = ev.evaluate_predictions(gjerdrum_df, 100, gjerdrum_tmyr['Id'], None, metrics="many", path = r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score.xlsx")
+    print("Ferdig med resultater totalt")
+    gjerdrum_results_for = ev.evaluate_artype_for(gjerdrum_df, gjerdrum_tmyr['Id'], r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_for.xlsx")
+    print("Ferdig med resultater før")
+    gjerdrum_results_etter = ev.evaluate_artype_etter(gjerdrum_df, gjerdrum_tmyr['Id'], r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_etter.xlsx")
+    print("Ferdig med resultater etter")
+    
+#%% Gjerdrum laste inn fra excel
+
+if fra_excel:
+    gjerdrum_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score.xlsx")
+    gjerdrum_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_for.xlsx", None)
+    gjerdrum_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_etter.xlsx", None)
+    
+#%% Gjerdrum plotting
+
+ev.artype_barplot(gjerdrum_results_for, gjerdrum_results, 60, "MCC", y=[-0.2, 0.4], title="Gjerdrum kommune før endringer")
+ev.artype_barplot(gjerdrum_results_etter, gjerdrum_results, 60, "MCC", y=[-0.2, 0.4], title="Gjerdrum kommune etter endringer")

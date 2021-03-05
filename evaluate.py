@@ -248,10 +248,10 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
                     "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
                     "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
                     "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
-                    "99": {'Navn':'Ikke kartlagt', 'Farge': '#000000'},
                     "100": {'Navn':'Totalt', 'Farge': '#000000'}}
     artyper = list(sorted(artype_props.keys()))
     
+
     scores = list()
     for i, artype in enumerate(artyper):
         if artype == "100":
