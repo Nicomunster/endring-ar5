@@ -12,20 +12,20 @@ import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, balanced_accuracy_score, confusion_matrix, matthews_corrcoef, roc_curve, roc_auc_score, auc
 
 
-def prediksjoner(df, area_threshold, n_thresholds):
+def prediksjoner(df, area_threshold, n_thresholds, id_column='Id'):
     """Grupperer arealer i samme rute og beregner prediksjoner for hver gridcode-verdi."""
     # Fjerner ugyldige verdier
     df = df[df['gridcode']!=-1.0]
     # Velger kolonner
     df['endring'] = df['endring'].fillna(0)
-    df = df[["Id", "gridcode", "endring", "areal_bit"]]
+    df = df[[id_column, "gridcode", "endring", "areal_bit"]]
 
     # Grupperer etter Id og endring/ikke endring
-    g = df.groupby(["Id", "gridcode", "endring"], as_index=False).sum()
+    g = df.groupby([id_column, "gridcode", "endring"], as_index=False).sum()
     # Fjerner de med areal mindre enn 10 % av ruta
     g = g[g['areal_bit']>=area_threshold]
     # Setter endring til hele ruta hvis det fortsatt finnes endring
-    grouped = g.groupby(["Id", "gridcode"], as_index=False).sum()
+    grouped = g.groupby([id_column, "gridcode"], as_index=False).sum()
     
     for i in range(n_thresholds+1):
         grouped["thr" + str(i)] = grouped["gridcode"] <= i
@@ -204,7 +204,7 @@ def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics=
     return results_dict
             
             
-def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='many'):
+def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='many', from_preds=False):
     """Beregner resultater delt på hvilken artype som er etter endringene."""
     results_dict = {}
     
