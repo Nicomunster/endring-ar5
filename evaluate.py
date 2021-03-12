@@ -277,7 +277,7 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
         plt.ylim(y)
     else:
         if metric == "MCC":
-            plt.ylim([-0.3, 0.3])
+            plt.ylim([-0.3, 0.5])
         elif metric == "F1":
             plt.ylim([0, 0.7])
     ax = sns.barplot(artyper_navn, scores, palette=artyper_farger)

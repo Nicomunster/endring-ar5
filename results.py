@@ -77,7 +77,7 @@ ev.artype_barplot(ullensaker_results_for, ullensaker_results, 60, "MCC", title="
 ev.artype_barplot(ullensaker_results_etter, ullensaker_results, 60, "MCC", title="Ullensaker kommune etter endringer")
 
 #%% Etnedal
-if fra_excel:
+if not fra_excel:
     # Laster inn csv-filer
     etnedal_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_pred_ar5_endring.csv", low_memory=False)
     etnedal_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_ruter_med_tresatt_myr.csv")
@@ -123,98 +123,138 @@ if fra_excel:
     
 #%% Gjerdrum plotting
 
-ev.artype_barplot(gjerdrum_results_for, gjerdrum_results, 60, "MCC", y=[-0.2, 0.4], title="Gjerdrum kommune før endringer")
-ev.artype_barplot(gjerdrum_results_etter, gjerdrum_results, 60, "MCC", y=[-0.2, 0.4], title="Gjerdrum kommune etter endringer")
+ev.artype_barplot(gjerdrum_results_for, gjerdrum_results, 60, "MCC", title="Gjerdrum kommune før endringer")
+ev.artype_barplot(gjerdrum_results_etter, gjerdrum_results, 60, "MCC", title="Gjerdrum kommune etter endringer")
 
 #%% Samlet
-
-# Laster inn dataframes og tresatt myr
-nes_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_pred_ar5_endring.csv", low_memory=False)
-nes_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_ruter_med_tresatt_myr.csv")
-nordaurdal_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_pred_ar5_endring.csv", low_memory=False)
-nordaurdal_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_ruter_med_tresatt_myr.csv")
-ullensaker_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_pred_ar5_endring.csv", low_memory=False)
-ullensaker_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_ruter_med_tresatt_myr.csv")
-etnedal_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_pred_ar5_endring.csv", low_memory=False)
-etnedal_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_ruter_med_tresatt_myr.csv")
-gjerdrum_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_pred_ar5_endring.csv", low_memory=False)
-gjerdrum_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_ruter_med_tresatt_myr.csv")
-dfs = [nes_df, nordaurdal_df, ullensaker_df, etnedal_df, gjerdrum_df]
-tmyrs = [nes_tmyr, nordaurdal_tmyr, ullensaker_tmyr, etnedal_tmyr, gjerdrum_tmyr]
-kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum"]
-
-# Prediksjoner
-preds_stack = []
-for df, tmyr in zip(dfs, tmyrs):
-    preds = ev.prediksjoner(df, 50, 100)
-    preds = ev.fjern_tmyr(preds, tmyr['Id'])
-    preds_stack.append(preds)
-
-samlet_preds = pd.concat(preds_stack, ignore_index=True)
-
-samlet_results = ev.scores_df(samlet_preds, "many")
-samlet_results.to_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score.xlsx")
-
-
-#%% Samlet artype før
-
-
-
-#%% Samlet artype etter
-
-# Hjelpefunksjon for artyper
-def f(row):
+if not fra_excel:
+    # Laster inn dataframes og tresatt myr
+    nes_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_pred_ar5_endring.csv", low_memory=False)
+    nes_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_ruter_med_tresatt_myr.csv")
+    nordaurdal_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_pred_ar5_endring.csv", low_memory=False)
+    nordaurdal_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_ruter_med_tresatt_myr.csv")
+    ullensaker_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_pred_ar5_endring.csv", low_memory=False)
+    ullensaker_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_ruter_med_tresatt_myr.csv")
+    etnedal_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_pred_ar5_endring.csv", low_memory=False)
+    etnedal_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_ruter_med_tresatt_myr.csv")
+    gjerdrum_df = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_pred_ar5_endring.csv", low_memory=False)
+    gjerdrum_tmyr = pd.read_csv(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_ruter_med_tresatt_myr.csv")
+    dfs = [nes_df, nordaurdal_df, ullensaker_df, etnedal_df, gjerdrum_df]
+    tmyrs = [nes_tmyr, nordaurdal_tmyr, ullensaker_tmyr, etnedal_tmyr, gjerdrum_tmyr]
+    kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum"]
+    
+    # Prediksjoner
+    preds_stack = []
+    for df, tmyr in zip(dfs, tmyrs):
+        preds = ev.prediksjoner(df, 50, 100)
+        preds = ev.fjern_tmyr(preds, tmyr['Id'])
+        preds_stack.append(preds)
+    
+    samlet_preds = pd.concat(preds_stack, ignore_index=True)
+    
+    samlet_results = ev.scores_df(samlet_preds, "many")
+    samlet_results.to_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score.xlsx")
+    
+    
+    # Samlet artype før
+    
+    subsets_for = {11: None, 12: None, 21: None, 22: None, 23: None, 30: None, 50: None, 60: None, 70: None, 80: None, 81: None, 82: None, 99: None}
+    for i, df in enumerate(dfs):
+        uniques = df['ARTYPE'].unique()
+        for artype_for in uniques:
+            print(f"Begynner på artype {artype_for}, kommune nr. {i}, før endringer.")
+            if not np.isnan(artype_for):
+                # Subset med artype
+                df_subset = df[df['ARTYPE']==artype_for]
+                
+                # Fjerner polygoner fra ruter med tresatt myr
+                df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
+                
+                # Lager kommune-id
+                df_subset['Kommune'] = [kommuner[i] for _ in range(df_subset.shape[0])]
+                df_subset['KommuneID'] = [kommuner[i] + str(rute_id) for rute_id in df_subset["Id"]]
+                
+                # Legger til rader i samlet dataframe for artypen
+                if subsets_for[artype_for] is None:
+                    subsets_for[artype_for] = df_subset
+                else:
+                    subsets_for[artype_for] = pd.concat([subsets_for[artype_for], df_subset], ignore_index=True)
+                print(f"Lagt til subset i samlet dataframe for artype {artype_for}, kommune nr. {i}, før endringer.")
+            
+    samlet_results_for = {}
+    with pd.ExcelWriter(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_for.xlsx") as writer:     
+        for artype, subset in subsets_for.items():
+            if subset is not None:
+                print(f"Beregner metrics for artype {artype} (samlet), før endringer.")
+                # Lager prediksjoner
+                preds = ev.prediksjoner(subset, 50, 100, id_column="KommuneID")
+                # Beregner metrics
+                results = ev.scores_df(preds, "many")
+                # Lagrer excel-fil
+                results.to_excel(writer, str(int(artype)))
+                # Lagrer resultater for artypen i dictionary
+                samlet_results_for[str(artype)] = results
+    
+    # Samlet artype etter
+    # Hjelpefunksjon for artyper
+    def f(row):
         if np.isnan(row['ARTYPE_NY']):
             a = row['ARTYPE']
         else:
             a = row['ARTYPE_NY']
         return a 
+    
+    # Artype subsets samlet
+    subsets_etter = {11: None, 12: None, 21: None, 22: None, 23: None, 30: None, 50: None, 60: None, 70: None, 80: None, 81: None, 82: None, 99: None}
+    for i, df in enumerate(dfs):
+        # Definerer ARTYPE_ETTER
+        df['ARTYPE_ETTER'] = df.apply(f, axis=1)
+        # Larger artypene som finnes i kommunen
+        uniques = df['ARTYPE_ETTER'].unique()
+        for artype_etter in uniques:
+            print(f"Begynner på artype {artype_etter}, kommune nr. {i}, etter endringer.")
+            if not np.isnan(artype_etter):
+                # Subset med artype
+                df_subset = df[df['ARTYPE_ETTER']==artype_etter]
+                
+                # Fjerner polygoner fra ruter med tresatt myr
+                df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
+                
+                # Lager kommune-id
+                df_subset['Kommune'] = [kommuner[i] for _ in range(df_subset.shape[0])]
+                df_subset['KommuneID'] = [kommuner[i] + str(rute_id) for rute_id in df_subset["Id"]]
+                
+                # Legger til rader i samlet dataframe for artypen
+                if subsets_etter[artype_etter] is None:
+                    subsets_etter[artype_etter] = df_subset
+                else:
+                    subsets_etter[artype_etter] = pd.concat([subsets_etter[artype_etter], df_subset], ignore_index=True)
+                print(f"Lagt til subset i samlet dataframe for artype {artype_etter}, kommune nr. {i}, etter endringer.")
+    
+    
+    samlet_results_etter = {}
+    with pd.ExcelWriter(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_etter.xlsx") as writer:     
+        for artype, subset in subsets_etter.items():
+            if subset is not None:
+                print(f"Beregner metrics for artype {artype} (samlet), etter endringer.")
+                # Lager prediksjoner
+                preds = ev.prediksjoner(subset, 50, 100, id_column="KommuneID")
+                # Beregner metrics
+                results = ev.scores_df(preds, "many")
+                # Lagrer excel-fil
+                results.to_excel(writer, str(int(artype)))
+                # Lagrer resultater for artypen i dictionary
+                samlet_results_etter[str(artype)] = results
 
-# Artype subsets samlet
-subsets_etter = {11: None, 12: None, 21: None, 22: None, 23: None, 30: None, 50: None, 60: None, 70: None, 80: None, 81: None, 82: None, 99: None}
-for i, df in enumerate(dfs):
-    # Definerer ARTYPE_ETTER
-    df['ARTYPE_ETTER'] = df.apply(f, axis=1)
-    # Larger artypene som finnes i kommunen
-    uniques = df['ARTYPE_ETTER'].unique()
-    for artype_etter in uniques:
-        print(f"Begynner på artype {artype_etter}, kommune nr. {i}")
-        if not np.isnan(artype_etter):
-            # Subset med artype
-            df_subset = df[df['ARTYPE_ETTER']==artype_etter]
-            
-            # Fjerner polygoner fra ruter med tresatt myr
-            df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
-            
-            # Lager kommune-id
-            df_subset['Kommune'] = [kommuner[i] for _ in range(df_subset.shape[0])]
-            df_subset['KommuneID'] = [kommuner[i] + str(rute_id) for rute_id in df_subset["Id"]]
-            
-            # Legger til rader i samlet dataframe for artypen
-            if subsets_etter[artype_etter] is None:
-                subsets_etter[artype_etter] = df_subset
-            else:
-                subsets_etter[artype_etter] = pd.concat([subsets_etter[artype_etter], df_subset], ignore_index=True)
-            print(f"Lagt til subset i samlet dataframe for artype {artype_etter}, kommune nr. {i}")
 
-
-samlet_results_etter = {}
-with pd.ExcelWriter(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_etter.xlsx") as writer:     
-    for artype, subset in subsets_etter.items():
-        if subset is not None:
-            print(f"Beregner metrics for artype {artype} (samlet).")
-            # Lager prediksjoner
-            preds = ev.prediksjoner(subset, 50, 100, id_column="KommuneID")
-            # Beregner metrics
-            results = ev.scores_df(preds, "many")
-            # Lagrer excel-fil
-            results.to_excel(writer, str(int(artype)))
-            # Lagrer resultater for artypen i dictionary
-            samlet_results_etter[str(artype)] = results
-
-
-
+#%% Samlet laste inn fra excel
+if fra_excel:
+    samlet_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score.xlsx")
+    samlet_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_for.xlsx", None)
+    samlet_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_etter.xlsx", None)
+    
 #%% Samlet plotting
 
-ev.artype_barplot(samlet_results_etter, samlet_results, 50, "MCC", y=[-0.3, 0.3], title="Alle kommuner samlet etter endringer")
+ev.artype_barplot(samlet_results_for, samlet_results, 50, "MCC", title="Alle kommuner samlet før endringer")
+ev.artype_barplot(samlet_results_etter, samlet_results, 50, "MCC", title="Alle kommuner samlet etter endringer")
 
