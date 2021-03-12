@@ -189,41 +189,33 @@ if fra_excel:
                     "Nord-Aurdal": {"Resultater": nordaurdal_results, "Etter": nordaurdal_results_etter, "Før": nordaurdal_results_for},
                     "Ullensaker": {"Resultater": ullensaker_results, "Etter": ullensaker_results_etter, "Før": ullensaker_results_for},
                     "Etnedal": {"Resultater": etnedal_results, "Etter": etnedal_results_etter, "Før": etnedal_results_for},
-                    "Gjerdrum": {"Resultater": gjerdrum_results, "Etter": gjerdrum_results_etter, "Før": gjerdrum_results_for}}
+                    "Gjerdrum": {"Resultater": gjerdrum_results, "Etter": gjerdrum_results_etter, "Før": gjerdrum_results_for},
+                    "Samlet": {"Resultater": samlet_results, "Etter": samlet_results_etter, "Før": samlet_results_for}}
 
 #%% Plotting
 
-def plot_flere(kommuner, tid=["Før", "Etter"]):
+def plot_kommuner(kommuner, tid, gridcode, metric):
+    """
+    Plott artyper for flere kommuner.
+    Inputs:
+        kommuner: liste med kommunenavn.
+        tid: enten "Før", "Etter", eller ["Før", "Etter"].
+        gridcode: terskelverdi for prediksjoner.
+        metric: nøyaktighetsmål til bruk for plotting, f. eks. "MCC" eller "F1".
+    """
     if isinstance(tid, str):
         tid = [tid]
     for kommune in kommuner:
         results = results_dict[kommune]["Resultater"]
         results_for = results_dict[kommune]["Før"]
         results_etter = results_dict[kommune]["Etter"]
-        ev.artype()
+        if kommune!="Samlet":
+            kommune = kommune + " kommune"
+        if "Før" in tid:
+            ev.artype_barplot(results_for, results, gridcode, metric, title=kommune+" før endringer")
+        if "Etter" in tid:
+            ev.artype_barplot(results_etter, results, gridcode, metric, title=kommune+" etter endringer")
         
-ev.artype_barplot(nes_results_for, nes_results, 30, "MCC", title="Nes kommune før endringer")
-ev.artype_barplot(nes_results_etter, nes_results, 30, "MCC", title="Nes kommune etter endringer")
-# Nord-Aurdal
-ev.artype_barplot(nordaurdal_results_for, nordaurdal_results, 50, "MCC", title="Nord-Aurdal kommune før endringer")
-ev.artype_barplot(nordaurdal_results_etter, nordaurdal_results, 50, "MCC", title="Nord-Aurdal kommune etter endringer")
-
-#%%  Ullensaker plotting
-ev.artype_barplot(ullensaker_results_for, ullensaker_results, 60, "MCC", title="Ullensaker kommune før endringer")
-ev.artype_barplot(ullensaker_results_etter, ullensaker_results, 60, "MCC", title="Ullensaker kommune etter endringer")
-
-#%% Etnedal plotting
-
-ev.artype_barplot(etnedal_results_for, etnedal_results, 50, "MCC", title="Etnedal kommune før endringer")
-ev.artype_barplot(etnedal_results_etter, etnedal_results, 50, "MCC" ,title="Etnedal kommune etter endringer")
-    
-#%% Gjerdrum plotting
-
-ev.artype_barplot(gjerdrum_results_for, gjerdrum_results, 60, "MCC", title="Gjerdrum kommune før endringer")
-ev.artype_barplot(gjerdrum_results_etter, gjerdrum_results, 60, "MCC", title="Gjerdrum kommune etter endringer")
-    
-#%% Samlet plotting
-
-ev.artype_barplot(samlet_results_for, samlet_results, 50, "MCC", title="Alle kommuner samlet før endringer")
-ev.artype_barplot(samlet_results_etter, samlet_results, 50, "MCC", title="Alle kommuner samlet etter endringer")
-
+#kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum", "Samlet"]
+kommuner = ["Nes", "Ullensaker", "Gjerdrum"]
+plot_kommuner(kommuner, "Før", 50, "MCC")
