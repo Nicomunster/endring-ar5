@@ -58,8 +58,8 @@ if not fra_excel:
     eidskog_results_etter = ev.evaluate_artype_etter(eidskog_df, eidskog_tmyr['Id'], r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_etter.xlsx")
     print("Samlet")
     # Laster inn dataframes og tresatt myr
-    dfs = [nes_df, nordaurdal_df, ullensaker_df, etnedal_df, gjerdrum_df, sorodal_df]
-    tmyrs = [nes_tmyr, nordaurdal_tmyr, ullensaker_tmyr, etnedal_tmyr, gjerdrum_tmyr, sorodal_tmyr]
+    dfs = [nes_df, nordaurdal_df, ullensaker_df, etnedal_df, gjerdrum_df, sorodal_df, eidskog_df]
+    tmyrs = [nes_tmyr, nordaurdal_tmyr, ullensaker_tmyr, etnedal_tmyr, gjerdrum_tmyr, sorodal_tmyr, eidskog_tmyr]
     kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum", "Sør-Odal", "Eidskog"]
     
     # Prediksjoner
@@ -188,12 +188,12 @@ if fra_excel:
     gjerdrum_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_etter.xlsx", None)
     # Sør-Odal
     sorodal_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score.xlsx")
-    sorodal_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score_artype_for.xlsx")
-    sorodal_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score_artype_etter.xlsx")
+    sorodal_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score_artype_for.xlsx", None)
+    sorodal_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score_artype_etter.xlsx", None)
     # Eidskog
     eidskog_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score.xlsx")
-    eidskog_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_for.xlsx")
-    eidskog_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_etter.xlsx")
+    eidskog_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_for.xlsx", None)
+    eidskog_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_etter.xlsx", None)
     # Samlet
     samlet_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score.xlsx")
     samlet_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_for.xlsx", None)

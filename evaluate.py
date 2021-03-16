@@ -256,7 +256,7 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
     for i, artype in enumerate(artyper):
         if artype == "100":
             scores.append(total_df.at[gridcode, metric])
-        elif artype not in results_dict.keys():
+        elif artype not in results_dict.keys() and float(artype) not in results_dict.keys():
             scores.append(0)
         else:
             df = results_dict[artype]
