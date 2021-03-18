@@ -35,13 +35,13 @@ def prediksjoner(df, area_threshold, n_thresholds, id_column='Id'):
 
 def fjern_tmyr(df, tmyr):
     """Fjerner alle ruter med tresatt myr. Input tmyr er en liste med Id til ruter med tresatt myr."""
-    df = df[~df['Id'].isin(tmyr)]
+    df = df[~df.isin(tmyr)]
     return df
 
 
-def fjern_skygge(df, skygge):
-    """Fjerner alle ruter med skygge"""
-    df = df[~df['Id'].isin(skygge)]
+def fjern_annet(df, skygge):
+    """Fjerner alle ruter i input"""
+    df = df[~df.isin(skygge)]
     return df
 
 
@@ -152,7 +152,7 @@ def save_xls(list_dfs, xls_path, area_thr_str):
         writer.save()
         
 
-def evaluate_predictions(df, gridcodes, tmyr, skygge, metrics, path=None, area_thr=50):
+def evaluate_predictions(df, tmyr, skygge, metrics="many", path=None, gridcodes=100, area_thr=50):
     """Beregner nøyaktighetsmål basert på dataframe.
     Inputs:
         df: dataframe med ruter, inkludert endring og gridcode.
@@ -244,7 +244,7 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
                     "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
                     "50": {'Navn':'Åpen fastmark', 'Farge': '#d9d9d9'},
                     "60": {'Navn':'Myr', 'Farge': '#1d7a8d'},
-                    "70": {'Navn':'Bre', 'Farge': '#e6ffff'},
+                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
                     "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
                     "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
                     "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
