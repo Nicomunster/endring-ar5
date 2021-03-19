@@ -14,21 +14,23 @@ fra_excel = True
 #%% Laste inn filer og beregne resultater
 
 kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg"]
-results = {}
+results = {kommune: {} for kommune in kommuner}
 if not fra_excel:
     for kommune in kommuner:
         print("Laster inn:", kommune)
-        results[kommune]["Data"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "resultater", kommune.lower()+"_pred_ar5_endring.csv"), low_memory=False)
-        results[kommune]["Tresatt myr"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "resultater", kommune.lower()+"_ruter_med_tresatt_myr.csv"))
+        results[kommune]["Data"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_pred_ar5_endring.csv"), low_memory=False)
+        results[kommune]["Tresatt myr"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_ruter_med_tresatt_myr.csv"))
         print("Beregner resultater:", kommune)
-        results[kommune]["Resultater totalt"] = ev.evaluate_predictions(results[kommune]["Data"], results[kommune]["Tresatt myr"], None, path=os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "resultater", kommune.lower()+"_score.xlsx"))
-        results[kommune]["Resultater artype før"] = ev.evaluate_artype_for(results[kommune]["Data"], results[kommune]["Tresatt myr"], path=os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "resultater", kommune.lower()+"_score_artype_for.xlsx"))
-        results[kommune]["Resultater artype etter"] = ev.evaluate_artype_etter(results[kommune]["Data"], results[kommune]["Tresatt myr"], path=os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "resultater", kommune.lower()+"_score_artype_etter.xlsx"))
+        results[kommune]["Resultater totalt"] = ev.evaluate_predictions(results[kommune]["Data"], results[kommune]["Tresatt myr"], None, path=os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score.xlsx"))
+        results[kommune]["Resultater artype før"] = ev.evaluate_artype_for(results[kommune]["Data"], results[kommune]["Tresatt myr"], os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score_artype_for.xlsx"))
+        results[kommune]["Resultater artype etter"] = ev.evaluate_artype_etter(results[kommune]["Data"], results[kommune]["Tresatt myr"], os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score_artype_etter.xlsx"))
         
-    # Laster inn dataframes og tresatt myr
-    dfs = [nes_df, nordaurdal_df, ullensaker_df, etnedal_df, gjerdrum_df, sorodal_df, eidskog_df]
-    tmyrs = [nes_tmyr, nordaurdal_tmyr, ullensaker_tmyr, etnedal_tmyr, gjerdrum_tmyr, sorodal_tmyr, eidskog_tmyr]
-    kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum", "Sør-Odal", "Eidskog"]
+    # Lagrer dataframes og tresatt myr i lister
+    dfs = []
+    tmyrs = []
+    for kommune in kommuner:
+        dfs.append(results[kommune]["Data"])
+        tmyrs.append(results[kommune]["Tresatt myr"])
     
     # Prediksjoner
     preds_stack = []
@@ -66,7 +68,8 @@ if not fra_excel:
                 else:
                     subsets_for[artype_for] = pd.concat([subsets_for[artype_for], df_subset], ignore_index=True)
                 print(f"Lagt til subset i samlet dataframe for artype {artype_for}, kommune nr. {i}, før endringer.")
-            
+    
+    # Beregne resultater samlet artype før
     samlet_results_for = {}
     with pd.ExcelWriter(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_for.xlsx") as writer:     
         for artype, subset in subsets_for.items():
@@ -75,11 +78,11 @@ if not fra_excel:
                 # Lager prediksjoner
                 preds = ev.prediksjoner(subset, 50, 100, id_column="KommuneID")
                 # Beregner metrics
-                results = ev.scores_df(preds, "many")
+                metr = ev.scores_df(preds, "many")
                 # Lagrer excel-fil
-                results.to_excel(writer, str(int(artype)))
+                metr.to_excel(writer, str(int(artype)))
                 # Lagrer resultater for artypen i dictionary
-                samlet_results_for[str(artype)] = results
+                samlet_results_for[str(artype)] = metr
     
     # Samlet artype etter
     # Hjelpefunksjon for artyper
@@ -117,7 +120,7 @@ if not fra_excel:
                     subsets_etter[artype_etter] = pd.concat([subsets_etter[artype_etter], df_subset], ignore_index=True)
                 print(f"Lagt til subset i samlet dataframe for artype {artype_etter}, kommune nr. {i}, etter endringer.")
     
-    
+    # Beregne resultater samlet artype etter
     samlet_results_etter = {}
     with pd.ExcelWriter(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_etter.xlsx") as writer:     
         for artype, subset in subsets_etter.items():
@@ -126,53 +129,23 @@ if not fra_excel:
                 # Lager prediksjoner
                 preds = ev.prediksjoner(subset, 50, 100, id_column="KommuneID")
                 # Beregner metrics
-                results = ev.scores_df(preds, "many")
+                metr = ev.scores_df(preds, "many")
                 # Lagrer excel-fil
-                results.to_excel(writer, str(int(artype)))
+                metr.to_excel(writer, str(int(artype)))
                 # Lagrer resultater for artypen i dictionary
-                samlet_results_etter[str(artype)] = results
+                samlet_results_etter[str(artype)] = metr
 
-# Nes
-nes_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_score.xlsx")
-nes_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_score_artype_for.xlsx", None)
-nes_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3034_Nes_2010_nobyg_4cities_300epochs\resultater\nes_score_artype_etter.xlsx", None)
-# Nord-Aurdal
-nordaurdal_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_score.xlsx")
-nordaurdal_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_score_artype_for.xlsx", None)
-nordaurdal_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3451_Nord_Aurdal_2010_nobyg_4cities_300epochs\resultater\nordaurdal_score_artype_etter.xlsx", None)
-# Ullensaker
-ullensaker_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_score.xlsx")
-ullensaker_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_score_artype_for.xlsx", None)
-ullensaker_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3033_Ullensaker_2010_nobyg_4cities_300epochs\resultater\ullensaker_score_artype_etter.xlsx", None)
-# Etnedal
-etnedal_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_score.xlsx")
-etnedal_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_score_artype_for.xlsx", None)
-etnedal_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3450_Etnedal_2010_nobyg_4cities_300epochs\Resultater\etnedal_score_artype_etter.xlsx", None)
-# Gjerdrum
-gjerdrum_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score.xlsx")
-gjerdrum_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_for.xlsx", None)
-gjerdrum_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3032_Gjerdrum_2010_nobyg_4cities_300epochs\Resultater\gjerdrum_score_artype_etter.xlsx", None)
-# Sør-Odal
-sorodal_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score.xlsx")
-sorodal_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score_artype_for.xlsx", None)
-sorodal_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3415_Sør-Odal_2010_nobyg_4cities_300epochs\Resultater\sorodal_score_artype_etter.xlsx", None)
-# Eidskog
-eidskog_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score.xlsx")
-eidskog_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_for.xlsx", None)
-eidskog_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\3416_Eidskog_2010_nobyg_4cities_300epochs\Resultater\eidskog_score_artype_etter.xlsx", None)
+# Laste inn fra excel
+for kommune in kommuner:
+    results[kommune]["Resultater totalt"] = pd.read_excel(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score.xlsx"))
+    results[kommune]["Resultater artype før"] = pd.read_excel(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score_artype_for.xlsx"), None)
+    results[kommune]["Resultater artype etter"] = pd.read_excel(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score_artype_etter.xlsx"), None)
+
 # Samlet
-samlet_results = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score.xlsx")
-samlet_results_for = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_for.xlsx", None)
-samlet_results_etter = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_etter.xlsx", None)
-    
-#results_dict = {"Nes": {"Resultater": nes_results, "Etter": nes_results_etter, "Før": nes_results_for},
-#                "Nord-Aurdal": {"Resultater": nordaurdal_results, "Etter": nordaurdal_results_etter, "Før": nordaurdal_results_for},
-#                "Ullensaker": {"Resultater": ullensaker_results, "Etter": ullensaker_results_etter, "Før": ullensaker_results_for},
-#                "Etnedal": {"Resultater": etnedal_results, "Etter": etnedal_results_etter, "Før": etnedal_results_for},
-#                "Gjerdrum": {"Resultater": gjerdrum_results, "Etter": gjerdrum_results_etter, "Før": gjerdrum_results_for},
-#                "Sør-Odal": {"Resultater": sorodal_results, "Etter": sorodal_results_etter, "Før": sorodal_results_for},
-#                "Eidskog": {"Resultater": eidskog_results, "Etter": eidskog_results_etter, "Før": eidskog_results_for},
-#                "Samlet": {"Resultater": samlet_results, "Etter": samlet_results_etter, "Før": samlet_results_for}}
+results["Samlet"] = {}
+results["Samlet"]["Resultater totalt"] = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score.xlsx")
+results["Samlet"]["Resultater artype før"] = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_for.xlsx", None)
+results["Samlet"]["Resultater artype etter"] = pd.read_excel(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner\Samlet\Resultater\samlet_score_artype_etter.xlsx", None)
 
 #%% Plotting
 
@@ -188,9 +161,9 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric):
     if isinstance(tid, str):
         tid = [tid]
     for kommune in kommuner:
-        results = results_dict[kommune]["Resultater"]
-        results_for = results_dict[kommune]["Før"]
-        results_etter = results_dict[kommune]["Etter"]
+        results = results_dict[kommune]["Resultater totalt"]
+        results_for = results_dict[kommune]["Resultater artype før"]
+        results_etter = results_dict[kommune]["Resultater artype etter"]
         if kommune!="Samlet":
             kommune = kommune + " kommune"
         if "Før" in tid:
@@ -200,4 +173,4 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric):
         
 kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum", "Sør-Odal", "Eidskog", "Samlet"]
 #kommuner = ["Nes", "Ullensaker", "Gjerdrum"]
-plot_kommuner(kommuner, results, "Før", 50, "MCC")
+plot_kommuner(kommuner, results, "Før", 50, "F1")
