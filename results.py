@@ -171,6 +171,6 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric):
         if "Etter" in tid:
             ev.artype_barplot(results_etter, results, gridcode, metric, title=kommune+" etter endringer")
         
-kommuner = ["Nes", "Nord-Aurdal", "Ullensaker", "Etnedal", "Gjerdrum", "Sør-Odal", "Eidskog", "Samlet"]
+kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg", "Samlet"]
 #kommuner = ["Nes", "Ullensaker", "Gjerdrum"]
 plot_kommuner(kommuner, results, "Før", 50, "F1")

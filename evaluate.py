@@ -48,21 +48,21 @@ def fjern_annet(df, skygge):
 def scores_df(df, metrics):
     """Beregner mål på klassifikasjonsnøyaktighet"""
     if metrics == 'all':
-        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "TPR (Recall)", "TNR", "FPR", "FNR", "PPV (Precision)", "NPV", "Accuracy", "Balanced Accuracy", "F1"]
+        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "FPR", "FNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1"]
     elif metrics == 'many':
-        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "TPR (Recall)", "TNR", "PPV (Precision)", "NPV", "Accuracy", "Balanced Accuracy", "F1", "MCC"]
+        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "MCC"]
     results = {}
     results["threshold"] = list(range(101))
     for metric in metrics:
         results[metric] = []
     
     for thr in results["threshold"]:
-        if "PPV (Precision)" in metrics:
+        if "Precision" in metrics:
             pre = precision_score(df['endring'], df["thr" + str(thr)])
             results["PPV (Precision)"].append(pre)
-        if "TPR (Recall)" in metrics:
-            TPR = recall_score(df['endring'], df["thr" + str(thr)])
-            results["TPR (Recall)"].append(TPR)
+        if "Recall" in metrics:
+            rec = recall_score(df['endring'], df["thr" + str(thr)])
+            results["TPR (Recall)"].append(rec)
         if "F1" in metrics:
             f1 = f1_score(df['endring'], df["thr" + str(thr)])
             results["F1"].append(f1)
@@ -251,36 +251,63 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
                     "100": {'Navn':'Totalt', 'Farge': '#000000'}}
     artyper = list(sorted(artype_props.keys()))
     
-
+    # Tomme lister
     scores = list()
+    if metric=="F1": 
+        positive_rates = list()
+        
     for i, artype in enumerate(artyper):
-        if artype == "100":
+        if artype == "100": # Hvis totalt
             scores.append(total_df.at[gridcode, metric])
-        elif artype not in results_dict.keys() and float(artype) not in results_dict.keys():
+            # Hvis F1, legg til positive rate
+            if metric=="F1":
+                positive_rates.append(total_df.at[gridcode, "Positive"])
+                    
+        elif artype not in results_dict.keys() and float(artype) not in results_dict.keys(): # Hvis artypen ikke finnes i datasettet
             scores.append(0)
-        else:
+            if metric=="F1":
+                positive_rates.append(0)
+            
+        else: # Hvis artype
             df = results_dict[artype]
             score = df.at[gridcode, metric]
             scores.append(score)
+            # Hvis F1, legg til positive rate
+            if metric=="F1":
+                positive_rates.append(df.at[gridcode, "Positive"])
+    
+    # F1 baseline
+    if metric=="F1":
+        baselines = [(2*pr)/(pr+1) for pr in positive_rates]
     
     # Navn og farge til artyper
     artyper_navn = [artype_props[a]['Navn'] for a in artyper]
     artyper_farger = [artype_props[a]['Farge'] for a in artyper]
     
-    #Plotting
+    # Plotting
     plt.figure(figsize=(8,6))
-    plt.xlabel("Arealtype")
-    plt.ylabel(metric)
+    plt.xlabel("Arealtype", fontsize=14)
+    plt.ylabel(metric, fontsize=14)
     if title is not None:
-        plt.title(title)
+        title = title + ": " + metric
+        plt.title(title, fontsize=14)
     if y is not None:
         plt.ylim(y)
     else:
         if metric == "MCC":
             plt.ylim([-0.3, 0.5])
         elif metric == "F1":
-            plt.ylim([0, 0.7])
-    ax = sns.barplot(artyper_navn, scores, palette=artyper_farger)
+            plt.ylim([0, 1])
+    ax = sns.barplot(artyper_navn, scores, palette=artyper_farger, edgecolor="black")
+    
+    # Plotte baseline hvis F1
+    if metric=="F1":
+        n_bs = len(baselines)
+        for i, b in enumerate(baselines):
+            ax.axhline(y=b, xmin=i*1/n_bs, xmax=(i+1)*1/n_bs, color="red", linewidth=2)
+    elif metric=="MCC":
+        ax.axhline(y=0, xmin=0, xmax=1, color="red", linewidth=2)
+            
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right")
     plt.tight_layout()
     plt.show()
