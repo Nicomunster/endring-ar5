@@ -10,14 +10,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, balanced_accuracy_score, confusion_matrix, matthews_corrcoef, roc_curve, roc_auc_score, auc
-
+from math import sqrt
 
 def prediksjoner(df, area_threshold, n_thresholds, id_column='Id'):
     """Grupperer arealer i samme rute og beregner prediksjoner for hver gridcode-verdi."""
     # Fjerner ugyldige verdier
     df = df[df['gridcode']!=-1.0]
     # Velger kolonner
-    df['endring'] = df['endring'].fillna(0)
+    df.fillna({"endring": 0}, inplace=True)
     df = df[[id_column, "gridcode", "endring", "areal_bit"]]
 
     # Grupperer etter Id og endring/ikke endring
@@ -48,51 +48,29 @@ def fjern_annet(df, skygge):
 def scores_df(df, metrics):
     """Beregner mål på klassifikasjonsnøyaktighet"""
     if metrics == 'all':
-        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "FPR", "FNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1"]
+        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "FPR", "FNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "Informedness", "Markedness", "MCC"]
     elif metrics == 'many':
-        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "MCC"]
+        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "Informedness", "Markedness", "MCC"]
     results = {}
     results["threshold"] = list(range(101))
     for metric in metrics:
         results[metric] = []
     
     for thr in results["threshold"]:
-        if "Precision" in metrics:
-            pre = precision_score(df['endring'], df["thr" + str(thr)])
-            results["PPV (Precision)"].append(pre)
-        if "Recall" in metrics:
-            rec = recall_score(df['endring'], df["thr" + str(thr)])
-            results["TPR (Recall)"].append(rec)
-        if "F1" in metrics:
-            f1 = f1_score(df['endring'], df["thr" + str(thr)])
-            results["F1"].append(f1)
-        if "Accuracy" in metrics:
-            acc = accuracy_score(df['endring'], df["thr" + str(thr)])
-            results["Accuracy"].append(acc)
-        if "Balanced Accuracy" in metrics:
-            bal_acc = balanced_accuracy_score(df['endring'], df["thr" + str(thr)])
-            results["Balanced Accuracy"].append(bal_acc)
-        if "MCC" in metrics:
-            mcc = matthews_corrcoef(df['endring'], df["thr" + str(thr)])
-            results["MCC"].append(mcc)
-        
         TN, FP, FN, TP = confusion_matrix(df['endring'], df["thr" + str(thr)], labels=[0, 1]).ravel()/df.shape[0]
-        if "TP" in metrics:
-            results["TP"].append(TP)
-        if "TN" in metrics:
-            results["TN"].append(TN)
-        if "FP" in metrics:
-            results["FP"].append(FP)
-        if "FN" in metrics:
-            results["FN"].append(FN)
-        if "TNR" in metrics:
-            results["TNR"].append(TN/(TN+FP))
-        if "FPR" in metrics:
-            results["FPR"].append(FP/(FP+TN))
-        if "FNR" in metrics:
-            results["FNR"].append(FN/(FN+TP))
-        if "NPV" in metrics:
-            results["NPV"].append(TN/(TN+FN))
+        
+        pre = TP/(TP+FP)
+        NPV = TN/(TN+FN)
+        rec = TP/(TP+FN)
+        TNR = TN/(TN+FP)
+        
+        F1 = 2*(pre*rec)/(pre+rec)
+        acc = (TP+TN)/(TP+TN+FP+FN)
+        bal_acc = (rec+TNR)/2
+        MCC = (TP*TN - FP*FN)/(sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN)))
+        informedness = rec + TNR - 1
+        markedness = pre + NPV - 1 
+        
         if "Positive" in metrics:
             results["Positive"].append(TP+FN)
         if "Negative" in metrics:
@@ -102,6 +80,42 @@ def scores_df(df, metrics):
         if "Pred. Negative" in metrics:
             results["Pred. Negative"].append(TN+FN)
 
+        if "TP" in metrics:
+            results["TP"].append(TP)
+        if "TN" in metrics:
+            results["TN"].append(TN)
+        if "FP" in metrics:
+            results["FP"].append(FP)
+        if "FN" in metrics:
+            results["FN"].append(FN)        
+
+        if "Precision" in metrics:
+            results["Precision"].append(pre)
+        if "NPV" in metrics:
+            results["NPV"].append(NPV)
+        if "Recall" in metrics:
+            results["Recall"].append(rec)
+        if "TNR" in metrics:
+            results["TNR"].append(TNR)
+        
+        if "F1" in metrics:
+            results["F1"].append(F1)
+        if "Accuracy" in metrics:
+            results["Accuracy"].append(acc)
+        if "Balanced Accuracy" in metrics:
+            results["Balanced Accuracy"].append(bal_acc)
+        if "Informedness" in metrics:
+            results["Informedness"].append(informedness)
+        if "Markedness" in metrics:
+            results["Markedness"].append(markedness)
+        if "MCC" in metrics:
+            results["MCC"].append(MCC)
+        
+        if "FPR" in metrics:
+            results["FPR"].append(FP/(FP+TN))
+        if "FNR" in metrics:
+            results["FNR"].append(FN/(FN+TP))
+        
     score_df = pd.DataFrame(results)    
     return score_df
 
@@ -152,7 +166,7 @@ def save_xls(list_dfs, xls_path, area_thr_str):
         writer.save()
         
 
-def evaluate_predictions(df, tmyr, skygge, metrics="many", path=None, gridcodes=100, area_thr=50):
+def evaluate_predictions(df, tmyr, annet, metrics="all", path=None, gridcodes=100, area_thr=50):
     """Beregner nøyaktighetsmål basert på dataframe.
     Inputs:
         df: dataframe med ruter, inkludert endring og gridcode.
@@ -174,8 +188,8 @@ def evaluate_predictions(df, tmyr, skygge, metrics="many", path=None, gridcodes=
         preds = fjern_tmyr(preds, tmyr)
 
     # Fjerner skygge
-    if skygge is not None:
-        preds = fjern_skygge(preds, skygge)
+    if annet is not None:
+        preds = fjern_annet(preds, annet)
 
     # Beregner nøyaktighetsmål
     results = scores_df(preds, metrics)
@@ -187,7 +201,7 @@ def evaluate_predictions(df, tmyr, skygge, metrics="many", path=None, gridcodes=
     return results
 
 
-def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='many'):
+def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='all'):
     """Beregner resultater delt på hvilken artype som var."""
     results_dict = {}
     with pd.ExcelWriter(xls_path) as writer:
@@ -204,7 +218,7 @@ def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics=
     return results_dict
             
             
-def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='many', from_preds=False):
+def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='all', from_preds=False):
     """Beregner resultater delt på hvilken artype som er etter endringene."""
     results_dict = {}
     

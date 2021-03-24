@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import evaluate as ev
 
-fra_excel = True
+fra_excel = False
 #%% Laste inn filer og beregne resultater
 
 kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg"]
@@ -173,4 +173,4 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric):
         
 kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg", "Samlet"]
 #kommuner = ["Nes", "Ullensaker", "Gjerdrum"]
-plot_kommuner(kommuner, results, "Før", 50, "F1")
+plot_kommuner(kommuner, results, "Før", 50, "MCC")
