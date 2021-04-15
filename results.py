@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import evaluate as ev
 
-fra_excel = False
+fra_excel = True
 #%% Laste inn filer og beregne resultater
 
 kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg"]
@@ -19,7 +19,13 @@ if not fra_excel:
     for kommune in kommuner:
         print("Laster inn:", kommune)
         results[kommune]["Data"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_pred_ar5_endring.csv"), low_memory=False)
-        results[kommune]["Tresatt myr"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_ruter_med_tresatt_myr.csv"))
+        if kommune in ["Sola", "Randaberg"]:
+            tmyr = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_ruter_med_tresatt_myr.csv"))["Id"].values.tolist()
+            hav = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_ruter_med_hav.csv"))["Id"].values.tolist()
+            results[kommune]["Tresatt myr"] = tmyr + hav
+            print(len(set(results[kommune]["Tresatt myr"])))
+        else:
+            results[kommune]["Tresatt myr"] = pd.read_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_ruter_med_tresatt_myr.csv"))
         print("Beregner resultater:", kommune)
         results[kommune]["Resultater totalt"] = ev.evaluate_predictions(results[kommune]["Data"], results[kommune]["Tresatt myr"], None, path=os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score.xlsx"))
         results[kommune]["Resultater artype før"] = ev.evaluate_artype_for(results[kommune]["Data"], results[kommune]["Tresatt myr"], os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score_artype_for.xlsx"))
@@ -31,12 +37,16 @@ if not fra_excel:
     for kommune in kommuner:
         dfs.append(results[kommune]["Data"])
         tmyrs.append(results[kommune]["Tresatt myr"])
-    
+
+if not fra_excel:
     # Prediksjoner
     preds_stack = []
     for df, tmyr in zip(dfs, tmyrs):
         preds = ev.prediksjoner(df, 50, 100)
-        preds = ev.fjern_tmyr(preds, tmyr['Id'])
+        if type(tmyr) == list:
+            preds = ev.fjern_tmyr(preds, tmyr)
+        else:
+            preds = ev.fjern_tmyr(preds, tmyr['Id'])
         preds_stack.append(preds)
     
     samlet_preds = pd.concat(preds_stack, ignore_index=True)
@@ -56,7 +66,10 @@ if not fra_excel:
                 df_subset = df[df['ARTYPE']==artype_for]
                 
                 # Fjerner polygoner fra ruter med tresatt myr
-                df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
+                if type(tmyrs[i]) == list:
+                    df_subset = ev.fjern_tmyr(df_subset, tmyrs[i])
+                else:
+                    df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
                 
                 # Lager kommune-id
                 df_subset['Kommune'] = [kommuner[i] for _ in range(df_subset.shape[0])]
@@ -107,7 +120,10 @@ if not fra_excel:
                 df_subset = df[df['ARTYPE_ETTER']==artype_etter]
                 
                 # Fjerner polygoner fra ruter med tresatt myr
-                df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
+                if type(tmyrs[i]) == list:
+                    df_subset = ev.fjern_tmyr(df_subset, tmyrs[i])
+                else:
+                    df_subset = ev.fjern_tmyr(df_subset, tmyrs[i]['Id'])
                 
                 # Lager kommune-id
                 df_subset['Kommune'] = [kommuner[i] for _ in range(df_subset.shape[0])]
@@ -149,7 +165,7 @@ results["Samlet"]["Resultater artype etter"] = pd.read_excel(r"C:\Users\nicol\Do
 
 #%% Plotting
 
-def plot_kommuner(kommuner, results_dict, tid, gridcode, metric):
+def plot_kommuner(kommuner, results_dict, tid, gridcode, metric, title=None):
     """
     Plott artyper for flere kommuner.
     Inputs:
@@ -167,10 +183,15 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric):
         if kommune!="Samlet":
             kommune = kommune + " kommune"
         if "Før" in tid:
-            ev.artype_barplot(results_for, results, gridcode, metric, title=kommune+" før endringer")
+            if title is None:
+                plot_title = metric + " i " + kommune + " fordelt på arealtype"
+            else:
+                plot_title = title
+            if kommune=="Samlet":
+                plot_title = metric + " i alle kommuner fordelt på arealtype"
+            ev.artype_barplot(results_for, results, gridcode, metric, title=plot_title)
         if "Etter" in tid:
             ev.artype_barplot(results_etter, results, gridcode, metric, title=kommune+" etter endringer")
         
-kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg", "Samlet"]
-#kommuner = ["Nes", "Ullensaker", "Gjerdrum"]
+kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg"]
 plot_kommuner(kommuner, results, "Før", 50, "MCC")

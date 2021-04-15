@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, balanced_accuracy_score, confusion_matrix, matthews_corrcoef, roc_curve, roc_auc_score, auc
+from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score, auc
 from math import sqrt
 
 def prediksjoner(df, area_threshold, n_thresholds, id_column='Id'):
@@ -32,16 +32,54 @@ def prediksjoner(df, area_threshold, n_thresholds, id_column='Id'):
         
     return grouped
 
+def prediksjoner_artype(df, area_threshold, n_thresholds):
+    """Grupperer arealer i samme rute og beregner prediksjoner for hver gridcode. 
+    Beholder arealtype. Arealtypen til en rute bestemmes av den arealtypen som dekker mest av ruta."""
+    df = df[df['gridcode']!=-1.0]
+    df.fillna({"endring": 0}, inplace=True)
+    df = df[["Id", "gridcode", "endring", "areal_bit", "ARTYPE"]]
+    
+    
+    g = df.groupby(["Id", "gridcode", "endring", "ARTYPE"], as_index=False).sum()
+    g = g[g['areal_bit']>=50]
+    grouped = g.groupby(["Id", "gridcode", "ARTYPE"], as_index=False).sum()
+    
+    
+    
+    f = {"Id": [], "gridcode": [], "ARTYPE": [], "endring": [], "areal_bit": []}
+    for i in grouped["Id"].unique():
+        current_biggest = None
+        current_endring = 0
+        polygons = grouped[grouped["Id"]==i]
+        for index, row in polygons.iterrows():
+            area = row["areal_bit"]
+            if row["endring"]==1:
+                current_endring = 1
+            if current_biggest is None or area > current_biggest["areal_bit"]:
+                current_biggest = row
+                
+        f["Id"].append(current_biggest["Id"])
+        f["gridcode"].append(current_biggest["gridcode"])
+        f["ARTYPE"].append(current_biggest["ARTYPE"])
+        f["endring"].append(current_endring)
+        f["areal_bit"].append(current_biggest["areal_bit"])
+    
+    f_df = pd.DataFrame.from_dict(f)            
+    
+    for i in range(n_thresholds+1):
+        f_df["thr" + str(i)] = f_df["gridcode"] <= i
+    
+    return f_df
 
 def fjern_tmyr(df, tmyr):
     """Fjerner alle ruter med tresatt myr. Input tmyr er en liste med Id til ruter med tresatt myr."""
-    df = df[~df.isin(tmyr)]
+    df = df[~df["Id"].isin(tmyr)]
     return df
 
 
 def fjern_annet(df, skygge):
     """Fjerner alle ruter i input"""
-    df = df[~df.isin(skygge)]
+    df = df[~df["Id"].isin(skygge)]
     return df
 
 
@@ -303,13 +341,12 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
     plt.xlabel("Arealtype", fontsize=14)
     plt.ylabel(metric, fontsize=14)
     if title is not None:
-        title = title + ": " + metric
         plt.title(title, fontsize=14)
     if y is not None:
         plt.ylim(y)
     else:
         if metric == "MCC":
-            plt.ylim([-0.3, 0.5])
+            plt.ylim([-0.3, 0.3])
         elif metric == "F1":
             plt.ylim([0, 1])
     ax = sns.barplot(artyper_navn, scores, palette=artyper_farger, edgecolor="black")
