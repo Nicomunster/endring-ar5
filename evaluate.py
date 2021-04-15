@@ -83,7 +83,7 @@ def fjern_annet(df, skygge):
     return df
 
 
-def scores_df(df, metrics):
+def scores_df(df, metrics="many"):
     """Beregner mål på klassifikasjonsnøyaktighet"""
     if metrics == 'all':
         metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "FPR", "FNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "Informedness", "Markedness", "MCC"]
@@ -204,7 +204,7 @@ def save_xls(list_dfs, xls_path, area_thr_str):
         writer.save()
         
 
-def evaluate_predictions(df, tmyr, annet, metrics="all", path=None, gridcodes=100, area_thr=50):
+def evaluate_predictions(df, tmyr, annet, metrics="many", path=None, gridcodes=100, area_thr=50):
     """Beregner nøyaktighetsmål basert på dataframe.
     Inputs:
         df: dataframe med ruter, inkludert endring og gridcode.
@@ -239,7 +239,7 @@ def evaluate_predictions(df, tmyr, annet, metrics="all", path=None, gridcodes=10
     return results
 
 
-def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='all'):
+def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='many'):
     """Beregner resultater delt på hvilken artype som var."""
     results_dict = {}
     with pd.ExcelWriter(xls_path) as writer:
@@ -256,7 +256,7 @@ def evaluate_artype_for(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics=
     return results_dict
             
             
-def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='all', from_preds=False):
+def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metrics='many', from_preds=False):
     """Beregner resultater delt på hvilken artype som er etter endringene."""
     results_dict = {}
     
