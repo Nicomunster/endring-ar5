@@ -5,6 +5,7 @@ Created on Tue Jan 19 10:21:10 2021
 @author: nicol
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -32,37 +33,61 @@ def prediksjoner(df, area_threshold, n_thresholds, id_column='Id'):
         
     return grouped
 
-def prediksjoner_artype(df, area_threshold, n_thresholds):
+def prediksjoner_artype(df, area_threshold, n_thresholds, id_column='Id', komm=None):
     """Grupperer arealer i samme rute og beregner prediksjoner for hver gridcode. 
     Beholder arealtype. Arealtypen til en rute bestemmes av den arealtypen som dekker mest av ruta."""
     df = df[df['gridcode']!=-1.0]
     df.fillna({"endring": 0}, inplace=True)
-    df = df[["Id", "gridcode", "endring", "areal_bit", "ARTYPE"]]
+    df = df[[id_column, "gridcode", "endring", "areal_bit", "ARTYPE"]]
     
-    
-    g = df.groupby(["Id", "gridcode", "endring", "ARTYPE"], as_index=False).sum()
+    g = df.groupby([id_column, "gridcode", "endring", "ARTYPE"], as_index=False).sum()
     g = g[g['areal_bit']>=50]
-    grouped = g.groupby(["Id", "gridcode", "ARTYPE"], as_index=False).sum()
+    grouped = g.groupby([id_column, "gridcode", "ARTYPE"], as_index=False).sum()
     
     
+    total_t01 = []
+    total_t12 = []
+    total_t23 = []
+    total_t34 = []
     
-    f = {"Id": [], "gridcode": [], "ARTYPE": [], "endring": [], "areal_bit": []}
-    for i in grouped["Id"].unique():
+    f = {id_column: [], "gridcode": [], "ARTYPE": [], "endring": [], "areal_bit": []}
+    for i in grouped[id_column].unique():
+        t0 = time.time()
         current_biggest = None
         current_endring = 0
-        polygons = grouped[grouped["Id"]==i]
+        if komm=="Samlet":
+            print(i)
+        t1 = time.time()
+        polygons = grouped[grouped[id_column]==i]
+        t2 = time.time()
+        if komm=="Samlet":
+            print("ferdig poly", i)
         for index, row in polygons.iterrows():
             area = row["areal_bit"]
             if row["endring"]==1:
                 current_endring = 1
             if current_biggest is None or area > current_biggest["areal_bit"]:
                 current_biggest = row
-                
-        f["Id"].append(current_biggest["Id"])
+        t3 = time.time()
+        if komm=="Samlet":
+            print("ferdig", i)
+        
+        f[id_column].append(current_biggest[id_column])
         f["gridcode"].append(current_biggest["gridcode"])
         f["ARTYPE"].append(current_biggest["ARTYPE"])
         f["endring"].append(current_endring)
         f["areal_bit"].append(current_biggest["areal_bit"])
+        t4 = time.time()
+        
+        total_t01.append(t1-t0)
+        total_t12.append(t2-t1)
+        total_t23.append(t3-t2)
+        total_t34.append(t4-t3)
+    
+    print("t01:", np.mean(total_t01), sum(total_t01), len(total_t01))
+    print("t12:", np.mean(total_t12), sum(total_t12), len(total_t12))
+    print("t23:", np.mean(total_t23), sum(total_t23), len(total_t23))
+    print("t34:", np.mean(total_t34), sum(total_t34), len(total_t34))
     
     f_df = pd.DataFrame.from_dict(f)            
     
@@ -289,18 +314,19 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
     """Plotter resultater basert på artype."""
     # Dictionary som lagrer navn of farge til ARTYPE-kodene
     artype_props = {"11": {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
-                    "12": {'Navn':'Samferdsel', 'Farge': '#b3784c'},
+#                    "12": {'Navn':'Samferdsel', 'Farge': '#b3784c'},
                     "21": {'Navn':'Fulldyrka jord', 'Farge': '#ffd16e'},
                     "22": {'Navn':'Overflatedyrka jord', 'Farge': '#ffff4c'},
                     "23": {'Navn':'Innmarksbeite', 'Farge': '#ffffad'},
                     "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
                     "50": {'Navn':'Åpen fastmark', 'Farge': '#d9d9d9'},
-                    "60": {'Navn':'Myr', 'Farge': '#1d7a8d'},
-                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
-                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
-                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
-                    "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
-                    "100": {'Navn':'Totalt', 'Farge': '#000000'}}
+                    "60": {'Navn':'Myr', 'Farge': '#ccfefe'},
+#                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
+#                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
+#                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
+#                    "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
+                    "100": {'Navn':'Totalt', 'Farge': '#000000'}
+                    }
     artyper = list(sorted(artype_props.keys()))
     
     # Tomme lister
@@ -337,16 +363,16 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
     artyper_farger = [artype_props[a]['Farge'] for a in artyper]
     
     # Plotting
-    plt.figure(figsize=(8,6))
-    plt.xlabel("Arealtype", fontsize=14)
-    plt.ylabel(metric, fontsize=14)
+    plt.figure(figsize=(10,8))
+    plt.xlabel("Arealtype", fontsize=20)
+    plt.ylabel(metric, fontsize=20)
     if title is not None:
-        plt.title(title, fontsize=14)
+        plt.title(title, fontsize=22)
     if y is not None:
         plt.ylim(y)
     else:
         if metric == "MCC":
-            plt.ylim([-0.3, 0.3])
+            plt.ylim([-0.5, 0.5])
         elif metric == "F1":
             plt.ylim([0, 1])
     ax = sns.barplot(artyper_navn, scores, palette=artyper_farger, edgecolor="black")
@@ -359,7 +385,8 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
     elif metric=="MCC":
         ax.axhline(y=0, xmin=0, xmax=1, color="red", linewidth=2)
             
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right", fontsize=18)
+    ax.tick_params(axis="y", labelsize="16")
     plt.tight_layout()
     plt.show()
         
