@@ -376,21 +376,23 @@ def artype_barplot(artype, artype_dict, gridcode, metric, title=None):
     plot_dict = {}
     for kommune, df in artype_dict.items():
         # Legger inn linjeskifte i kommunenavn
-        if kommune == "Ullensaker":
-            kommune = "Ullens-\naker"
-        elif kommune == "Sør-Odal":
-            kommune = "Sør-\nOdal"
-        elif kommune == "Nord-Aurdal":
-            kommune = "Nord-\nAurdal"
-        elif kommune == "Randaberg":
-            kommune = "Randa-\nberg"
+        # if kommune == "Gjerdrum":
+        #     kommune = "Gjerd-\nrum"
+        # elif kommune == "Ullensaker":
+        #     kommune = "Ullens-\naker"
+        # elif kommune == "Sør-Odal":
+        #     kommune = "Sør-\nOdal"
+        if kommune == "Nord-Aurdal":
+             kommune = "Nord-\nAurdal"
+        # elif kommune == "Randaberg":
+        #     kommune = "Randa-\nberg"
         if not isinstance(df, pd.DataFrame):
             plot_dict[kommune] = 0
         else:
             plot_dict[kommune] = df.at[gridcode, metric]
     
     # Plotting
-    plt.figure(figsize=(11,8))
+    plt.figure(figsize=(14,8))
     plt.xlabel("Kommune", fontsize=20)
     plt.ylabel(metric, fontsize=20)
     

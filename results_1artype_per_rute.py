@@ -133,7 +133,6 @@ def plot_artyper(kommuner, results_dict, gridcode, metric, title=None):
         
     # Sender til plottingsfunksjon for hver arealtype
     for artype, artype_dict in artype_dict.items():
-        print(artype)
         if artype == "100":
             plot_title = metric + " for alle arealtyper fordelt på kommuner"
         else:
