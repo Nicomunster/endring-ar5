@@ -96,14 +96,50 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric, title=None):
                 plot_title = title
             if kommune=="Samlet":
                 plot_title = metric + " i alle kommuner fordelt på arealtype"
-            ev.artype_barplot(results_for, results, gridcode, metric, title=plot_title)
+            ev.kommune_barplot(results_for, results, gridcode, metric, title=plot_title)
         if "Etter" in tid:
-            ev.artype_barplot(results_etter, results, gridcode, metric, title=kommune+" etter endringer")
+            ev.kommune_barplot(results_etter, results, gridcode, metric, title=kommune+" etter endringer")
 
 def plot_artyper(kommuner, results_dict, gridcode, metric, title=None):
-    """Søyeldiagram
+    """Et søyeldiagram for hevr arealtype, som viser forskjellige kommuner.
     """
+    
+    artype_props = {"11": {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
+#                    "12": {'Navn':'Samferdsel', 'Farge': '#b3784c'},
+                    "21": {'Navn':'Fulldyrka jord', 'Farge': '#ffd16e'},
+                    "22": {'Navn':'Overflatedyrka jord', 'Farge': '#ffff4c'},
+                    "23": {'Navn':'Innmarksbeite', 'Farge': '#ffffad'},
+                    "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
+                    "50": {'Navn':'Åpen fastmark', 'Farge': '#d9d9d9'},
+                    "60": {'Navn':'Myr', 'Farge': '#ccfefe'},
+#                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
+#                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
+#                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
+#                    "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
+                    "100": {'Navn':'Totalt', 'Farge': '#000000'}
+                    }
+    artyper = list(sorted(artype_props.keys()))
+    artype_dict = {}
+    
+    # Organiserer arealtypenes resultater i en dictionary
+    for artype in artyper:
+        artype_dict[artype] = {kommune: None for kommune in kommuner}
+    for kommune, kdict in results_dict.items():
+        for artype in artyper:
+            if artype == "100":
+                artype_dict[artype][kommune] = kdict["Resultater totalt"]
+            elif artype in kdict["Resultater artype før"].keys():
+                artype_dict[artype][kommune] = kdict["Resultater artype før"][artype]
+        
+    # Sender til plottingsfunksjon for hver arealtype
+    for artype, artype_dict in artype_dict.items():
+        print(artype)
+        if artype == "100":
+            plot_title = metric + " for alle arealtyper fordelt på kommuner"
+        else:
+            plot_title = metric + " for " + artype_props[artype]["Navn"].lower() + " fordelt på kommuner"
+        ev.artype_barplot(artype, artype_dict, gridcode, metric, title=plot_title)
 
 kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg", "Samlet"]
-plot_kommuner(kommuner, results, "Før", 50, "F1")
+plot_artyper(kommuner, results, 50, "MCC")
 

@@ -276,8 +276,8 @@ def evaluate_artype_etter(df, tmyr, xls_path, area_thr=50, gridcodes=100, metric
     return results_dict
 
 
-def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None):
-    """Plotter resultater basert på artype."""
+def kommune_barplot(results_dict, total_df, gridcode, metric, y=None, title=None):
+    """Plotter resultater fordelt på artype for en kommune."""
     # Dictionary som lagrer navn of farge til ARTYPE-kodene
     artype_props = {"11": {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
 #                    "12": {'Navn':'Samferdsel', 'Farge': '#b3784c'},
@@ -343,7 +343,7 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
             plt.ylim([0, 1])
     ax = sns.barplot(artyper_navn, scores, palette=artyper_farger, edgecolor="black")
     
-    # Plotte baseline hvis F1
+    # Plotte baseline 
     if metric=="F1":
         n_bs = len(baselines)
         for i, b in enumerate(baselines):
@@ -356,4 +356,60 @@ def artype_barplot(results_dict, total_df, gridcode, metric, y=None, title=None)
     ax.tick_params(axis="y", labelsize="16")
     plt.tight_layout()
     plt.show()
-        
+
+def artype_barplot(artype, artype_dict, gridcode, metric, title=None):
+    """Plotter resultater for én arealtype fordelt på kommuner."""
+    artype_props = {"11": {'Navn':'Bebygd', 'Farge': '#fcdbd9'},
+#                    "12": {'Navn':'Samferdsel', 'Farge': '#b3784c'},
+                "21": {'Navn':'Fulldyrka\njord', 'Farge': '#ffd16e'},
+                "22": {'Navn':'Overflate-\ndyrka\njord', 'Farge': '#ffff4c'},
+                "23": {'Navn':'Innmarks-\nbeite', 'Farge': '#ffffad'},
+                "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
+                "50": {'Navn':'Åpen\nfastmark', 'Farge': '#d9d9d9'},
+                "60": {'Navn':'Myr', 'Farge': '#ccfefe'},
+#                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
+#                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
+#                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
+#                    "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
+                "100": {'Navn':'Totalt', 'Farge': '#000000'}}
+    
+    plot_dict = {}
+    for kommune, df in artype_dict.items():
+        # Legger inn linjeskifte i kommunenavn
+        if kommune == "Ullensaker":
+            kommune = "Ullens-\naker"
+        elif kommune == "Sør-Odal":
+            kommune = "Sør-\nOdal"
+        elif kommune == "Nord-Aurdal":
+            kommune = "Nord-\nAurdal"
+        elif kommune == "Randaberg":
+            kommune = "Randa-\nberg"
+        if not isinstance(df, pd.DataFrame):
+            plot_dict[kommune] = 0
+        else:
+            plot_dict[kommune] = df.at[gridcode, metric]
+    
+    # Plotting
+    plt.figure(figsize=(11,8))
+    plt.xlabel("Kommune", fontsize=20)
+    plt.ylabel(metric, fontsize=20)
+    
+    # Setter tittel
+    if title is not None:
+        plt.title(title, fontsize=22)
+    
+    # Setter y akse
+    if metric == "MCC":
+        plt.ylim([-0.5, 0.5])
+    elif metric == "F1":
+        plt.ylim([0, 1])
+    
+    ax = sns.barplot(list(plot_dict.keys()), list(plot_dict.values()), color=artype_props[artype]["Farge"], edgecolor="black")
+    
+    # Lager rød baseline
+    if metric=="MCC":
+        ax.axhline(y=0, xmin=0, xmax=1, color="red", linewidth=2)
+    ax.tick_params(axis="x", labelsize="16")
+    ax.tick_params(axis="y", labelsize="16")
+    plt.tight_layout()
+    plt.show()
