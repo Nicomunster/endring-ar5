@@ -9,11 +9,11 @@ import os
 import pandas as pd
 import evaluate as ev
 
-fra_excel = False
+fra_excel = True
 
 #%% Laste inn filer og beregne resultater
 
-kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg"]
+kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg", "Samlet"]
 results = {kommune: {} for kommune in kommuner}
 if not fra_excel:
     for kommune in kommuner:
@@ -49,7 +49,7 @@ if not fra_excel:
         
         # Resultater totalt
         print("Beregner metrics totalt:", kommune)
-        results[kommune]["Resultater totalt"] = ev.scores_df(preds)
+        results[kommune]["Resultater totalt"] = ev.scores_df(preds, metrics=["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Precision", "Recall", "Accuracy", "F1", "MCC"])
         results[kommune]["Resultater totalt"].to_excel(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", kommune.lower()+"_score_1artype.xlsx"))
         
         # resultater arealtype før
@@ -59,7 +59,7 @@ if not fra_excel:
             for artype in preds["ARTYPE"].unique():
                 print("Beregner metrics for arealtype", artype)
                 subset = preds[preds["ARTYPE"]==artype]
-                subset_scores = ev.scores_df(subset)
+                subset_scores = ev.scores_df(subset, metrics=["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Precision", "Recall", "Accuracy", "F1", "MCC"])
                 results[kommune]["Resultater artype før"][artype] = subset_scores
                 subset_scores.to_excel(writer, str(int(artype)))
         print("------------------------------------")
@@ -99,6 +99,11 @@ def plot_kommuner(kommuner, results_dict, tid, gridcode, metric, title=None):
             ev.artype_barplot(results_for, results, gridcode, metric, title=plot_title)
         if "Etter" in tid:
             ev.artype_barplot(results_etter, results, gridcode, metric, title=kommune+" etter endringer")
-        
-kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg"]
-plot_kommuner(kommuner, results, "Før", 50, "MCC")
+
+def plot_artyper(kommuner, results_dict, gridcode, metric, title=None):
+    """Søyeldiagram
+    """
+
+kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", "Gjesdal", "Sola", "Randaberg", "Samlet"]
+plot_kommuner(kommuner, results, "Før", 50, "F1")
+
