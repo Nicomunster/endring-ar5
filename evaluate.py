@@ -5,7 +5,6 @@ Created on Tue Jan 19 10:21:10 2021
 @author: nicol
 """
 
-import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -55,7 +54,8 @@ def prediksjoner_artype(df, area_threshold, n_thresholds, id_column='Id', komm=N
                 biggest_rows[ID] = row.tolist()
     
     # Hver rad en rute, med arealtypen som dekker mest av ruta
-    f = pd.DataFrame.from_dict(biggest_rows, orient='index', columns=[id_column, "gridcode", "ARTYPE", "endring", "areal_bit"])            
+    f = pd.DataFrame.from_dict(biggest_rows, orient='index', columns=[id_column, "gridcode", "ARTYPE", 
+                                                                      "endring", "areal_bit"])            
     
     for i in range(n_thresholds+1):
         f["thr" + str(i)] = f["gridcode"] <= i
@@ -77,9 +77,13 @@ def fjern_annet(df, skygge):
 def scores_df(df, metrics="many"):
     """Beregner mål på klassifikasjonsnøyaktighet"""
     if metrics == 'all':
-        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "FPR", "FNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "Informedness", "Markedness", "MCC"]
+        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", 
+                   "TNR", "FPR", "FNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", 
+                   "Informedness", "Markedness", "MCC"]
     elif metrics == 'many':
-        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", "TNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", "Informedness", "Markedness", "MCC"]
+        metrics = ["Positive", "Negative", "Pred. Positive", "Pred. Negative", "TP", "TN", "FP", "FN", "Recall", 
+                   "TNR", "Precision", "NPV", "Accuracy", "Balanced Accuracy", "F1", 
+                   "Informedness", "Markedness", "MCC"]
     results = {}
     results["threshold"] = list(range(101))
     for metric in metrics:
@@ -307,7 +311,8 @@ def kommune_barplot(results_dict, total_df, gridcode, metric, y=None, title=None
             if metric=="F1":
                 positive_rates.append(total_df.at[gridcode, "Positive"])
                     
-        elif artype not in results_dict.keys() and float(artype) not in results_dict.keys(): # Hvis artypen ikke finnes i datasettet
+        elif artype not in results_dict.keys() and float(artype) not in results_dict.keys(): 
+            # Hvis artypen ikke finnes i datasettet
             scores.append(0)
             if metric=="F1":
                 positive_rates.append(0)
@@ -406,7 +411,8 @@ def artype_barplot(artype, artype_dict, gridcode, metric, title=None):
     elif metric == "F1":
         plt.ylim([0, 1])
     
-    ax = sns.barplot(list(plot_dict.keys()), list(plot_dict.values()), color=artype_props[artype]["Farge"], edgecolor="black")
+    ax = sns.barplot(list(plot_dict.keys()), list(plot_dict.values()), color=artype_props[artype]["Farge"], 
+                     edgecolor="black")
     
     # Lager rød baseline
     if metric=="MCC":
