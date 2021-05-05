@@ -290,12 +290,12 @@ def kommune_barplot(results_dict, total_df, gridcode, metric, y=None, title=None
                     "23": {'Navn':'Innmarks-\nbeite', 'Farge': '#ffffad'},
                     "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
                     "50": {'Navn':'Åpen\nfastmark', 'Farge': '#d9d9d9'},
-                    "60": {'Navn':'Myr', 'Farge': '#ccfefe'},
+                    "60": {'Navn':'Myr', 'Farge': '#d1d1ff'},
 #                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
 #                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
 #                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
 #                    "82": {'Navn':'Hav', 'Farge': '#ccfefe'},
-                    "100": {'Navn':'Totalt', 'Farge': '#000000'}
+                    "99": {'Navn':'Totalt', 'Farge': '#000000'}
                     }
     artyper = list(sorted(artype_props.keys()))
     
@@ -305,7 +305,7 @@ def kommune_barplot(results_dict, total_df, gridcode, metric, y=None, title=None
         positive_rates = list()
         
     for i, artype in enumerate(artyper):
-        if artype == "100": # Hvis totalt
+        if artype == "99": # Hvis totalt
             scores.append(total_df.at[gridcode, metric])
             # Hvis F1, legg til positive rate
             if metric=="F1":
@@ -371,7 +371,7 @@ def artype_barplot(artype, artype_dict, gridcode, metric, title=None):
                 "23": {'Navn':'Innmarks-\nbeite', 'Farge': '#ffffad'},
                 "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
                 "50": {'Navn':'Åpen\nfastmark', 'Farge': '#d9d9d9'},
-                "60": {'Navn':'Myr', 'Farge': '#ccfefe'},
+                "60": {'Navn':'Myr', 'Farge': '#d1d1ff'},
 #                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
 #                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
 #                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},

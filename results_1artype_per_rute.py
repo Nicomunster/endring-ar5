@@ -57,6 +57,13 @@ if not fra_excel:
         print("Fjerner unødvendige arealtyper:", kommune)
         preds = preds[~preds["ARTYPE"].isin([12., 70., 80., 81., 82., 99.])]
         
+        if kommune=="Samlet":
+            preds.to_csv(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", 
+                         kommune.lower()+"_preds.csv"))
+        else:
+            preds.to_excel(os.path.join(r"C:\Users\nicol\Documents\Masteroppgave\Februarprediksjoner", kommune, "Resultater", 
+                         kommune.lower()+"_preds.xlsx"))
+        
         # Resultater totalt
         print("Beregner metrics totalt:", kommune)
         results[kommune]["Resultater totalt"] = ev.scores_df(preds, 
@@ -133,7 +140,7 @@ def plot_artyper(kommuner, results_dict, gridcode, metric, title=None):
                     "23": {'Navn':'Innmarksbeite', 'Farge': '#ffffad'},
                     "30": {'Navn':'Skog', 'Farge': '#9ecc73'},
                     "50": {'Navn':'Åpen fastmark', 'Farge': '#d9d9d9'},
-                    "60": {'Navn':'Myr', 'Farge': '#ccfefe'},
+                    "60": {'Navn':'Myr', 'Farge': '#d1d1ff'},
 #                    "70": {'Navn':'Snøisbre', 'Farge': '#e6ffff'},
 #                    "80": {'Navn':'Vann', 'Farge': '#ccf5ff'},
 #                    "81": {'Navn':'Ferskvann', 'Farge': '#91e7ff'},
@@ -163,5 +170,5 @@ def plot_artyper(kommuner, results_dict, gridcode, metric, title=None):
 
 kommuner = ["Gjerdrum", "Ullensaker", "Nes", "Sør-Odal", "Eidskog", "Nord-Aurdal", "Etnedal", 
             "Gjesdal", "Sola", "Randaberg", "Samlet"]
-plot_artyper(kommuner, results, 50, "MCC")
+plot_kommuner(kommuner, results, "Før", 50, "MCC")
 
