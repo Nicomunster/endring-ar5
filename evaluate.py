@@ -397,8 +397,8 @@ def artype_barplot(artype, artype_dict, gridcode, metric, title=None):
             plot_dict[kommune] = df.at[gridcode, metric]
     
     # Plotting
-    plt.figure(figsize=(14,8))
-    plt.xlabel("Kommune", fontsize=20)
+    plt.figure(figsize=(8,7))
+    plt.xlabel("Region", fontsize=20)
     plt.ylabel(metric, fontsize=20)
     
     # Setter tittel
